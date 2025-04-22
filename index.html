@@ -1,22 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>R6 Siege Market Helper</title>
   <style>
+    :root {
+      --bg: #1e1e1e;
+      --fg: #ffffff;
+      --accent: #00c3ff;
+      --card: #2a2a2a;
+    }
+    body.light {
+      --bg: #f0f0f0;
+      --fg: #000000;
+      --card: #ffffff;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #1e1e1e;
-      color: #ffffff;
+      background-color: var(--bg);
+      color: var(--fg);
       margin: 0;
       padding: 40px;
       text-align: center;
+      transition: background 0.3s, color 0.3s;
     }
-
     h1 {
-      color: #00c3ff;
+      color: var(--accent);
     }
-
     input, button {
       padding: 12px;
       margin: 10px;
@@ -24,44 +35,52 @@
       border: none;
       border-radius: 5px;
     }
-
     input {
       width: 250px;
     }
-
     button {
-      background-color: #00c3ff;
+      background-color: var(--accent);
       color: #000;
       cursor: pointer;
     }
-
-    #recommendations {
+    #recommendations, #favorites, #sellSuggestions {
       margin-top: 30px;
       text-align: left;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      background-color: #2a2a2a;
+      background-color: var(--card);
       padding: 20px;
       border-radius: 10px;
     }
-
     .skin-item {
       border-bottom: 1px solid #444;
       padding: 10px 0;
+    }
+    .fav-btn {
+      margin-top: 5px;
+      background: #ffc107;
+      color: #000;
     }
   </style>
 </head>
 <body>
   <h1>R6 Market Helper</h1>
-  <p>Find the best skins to buy based on your R6 Credits</p>
-  <input type="number" id="budgetInput" placeholder="Enter your budget in R6 Credits">
-  <button onclick="suggestSkins()">Suggest Skins</button>
+  <p>Find the best skins to buy and sell based on your R6 Credits</p>
+
+  <input type="number" id="budgetInput" placeholder="Enter your budget in R6 Credits" />
+  <button onclick="suggestSkins()">Suggest Buys</button>
+  <button onclick="suggestSellSkins()">Suggest Sells</button>
+  <button onclick="toggleTheme()">Toggle Light/Dark Mode</button>
 
   <div id="recommendations"></div>
+  <div id="sellSuggestions"></div>
+  <div id="favorites">
+    <h2>⭐ Your Favorite Skins</h2>
+    <div id="favList"></div>
+  </div>
 
   <script>
-    // Sample skins dataset (mock data)
     const skins = [
       { name: "Black Ice - R4C", price: 1200, trend: "up", demand: "high" },
       { name: "Elite Ash Set", price: 1800, trend: "down", demand: "medium" },
@@ -74,15 +93,12 @@
 
     function suggestSkins() {
       const budget = parseInt(document.getElementById("budgetInput").value);
-      const filtered = skins.filter(
-        skin => skin.price <= budget && skin.trend === "up"
-      );
-
       const container = document.getElementById("recommendations");
+      const filtered = skins.filter(s => s.price <= budget && s.trend === "up");
       container.innerHTML = "<h2>Buy Recommendations</h2>";
 
       if (filtered.length === 0) {
-        container.innerHTML += "<p>No good buys available within your budget right now.</p>";
+        container.innerHTML += "<p>No strong buys right now within budget.</p>";
         return;
       }
 
@@ -91,11 +107,54 @@
           <div class="skin-item">
             <strong>${skin.name}</strong><br>
             Price: ${skin.price} R6 Credits<br>
+            Trend: ${skin.trend.toUpperCase()}, Demand: ${skin.demand.toUpperCase()}<br>
+            <button class="fav-btn" onclick='addToFavorites("${skin.name}")'>Add to Favorites</button>
+          </div>
+        `;
+      });
+    }
+
+    function suggestSellSkins() {
+      const container = document.getElementById("sellSuggestions");
+      const filtered = skins.filter(s => s.trend === "down" && s.demand !== "high");
+      container.innerHTML = "<h2>Sell Suggestions</h2>";
+
+      if (filtered.length === 0) {
+        container.innerHTML += "<p>No skins strongly recommended to sell right now.</p>";
+        return;
+      }
+
+      filtered.forEach(skin => {
+        container.innerHTML += `
+          <div class="skin-item">
+            <strong>${skin.name}</strong><br>
+            Current Value: ${skin.price} R6 Credits<br>
             Trend: ${skin.trend.toUpperCase()}, Demand: ${skin.demand.toUpperCase()}
           </div>
         `;
       });
     }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+    }
+
+    function addToFavorites(name) {
+      let favs = JSON.parse(localStorage.getItem("r6Favorites") || "[]");
+      if (!favs.includes(name)) {
+        favs.push(name);
+        localStorage.setItem("r6Favorites", JSON.stringify(favs));
+        displayFavorites();
+      }
+    }
+
+    function displayFavorites() {
+      let favs = JSON.parse(localStorage.getItem("r6Favorites") || "[]");
+      const favList = document.getElementById("favList");
+      favList.innerHTML = favs.length ? favs.map(f => `<p>${f}</p>`).join('') : '<p>No favorites yet.</p>';
+    }
+
+    displayFavorites();
   </script>
 </body>
 </html>
