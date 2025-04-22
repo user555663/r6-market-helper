@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>R6 Siege Market Helper</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      margin: 0;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #00c3ff;
+    }
+
+    input, button {
+      padding: 12px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    input {
+      width: 250px;
+    }
+
+    button {
+      background-color: #00c3ff;
+      color: #000;
+      cursor: pointer;
+    }
+
+    #recommendations {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .skin-item {
+      border-bottom: 1px solid #444;
+      padding: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>R6 Market Helper</h1>
+  <p>Find the best skins to buy based on your R6 Credits</p>
+  <input type="number" id="budgetInput" placeholder="Enter your budget in R6 Credits">
+  <button onclick="suggestSkins()">Suggest Skins</button>
+
+  <div id="recommendations"></div>
+
+  <script>
+    // Sample skins dataset (mock data)
+    const skins = [
+      { name: "Black Ice - R4C", price: 1200, trend: "up", demand: "high" },
+      { name: "Elite Ash Set", price: 1800, trend: "down", demand: "medium" },
+      { name: "Ying Seasonal", price: 600, trend: "up", demand: "low" },
+      { name: "Mute Protocol Set", price: 950, trend: "up", demand: "high" },
+      { name: "Frost Arctic Set", price: 700, trend: "flat", demand: "medium" },
+      { name: "Jäger Hel Series", price: 850, trend: "up", demand: "high" },
+      { name: "Default Skin", price: 100, trend: "flat", demand: "low" }
+    ];
+
+    function suggestSkins() {
+      const budget = parseInt(document.getElementById("budgetInput").value);
+      const filtered = skins.filter(
+        skin => skin.price <= budget && skin.trend === "up"
+      );
+
+      const container = document.getElementById("recommendations");
+      container.innerHTML = "<h2>Buy Recommendations</h2>";
+
+      if (filtered.length === 0) {
+        container.innerHTML += "<p>No good buys available within your budget right now.</p>";
+        return;
+      }
+
+      filtered.forEach(skin => {
+        container.innerHTML += `
+          <div class="skin-item">
+            <strong>${skin.name}</strong><br>
+            Price: ${skin.price} R6 Credits<br>
+            Trend: ${skin.trend.toUpperCase()}, Demand: ${skin.demand.toUpperCase()}
+          </div>
+        `;
+      });
+    }
+  </script>
+</body>
+</html>
